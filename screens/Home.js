@@ -19,7 +19,72 @@ import {getDatabase, ref, child, get,query, set,OrderByChild} from "firebase/dat
 
 const Home = ({navigation}) => {
 
-    const [objet_global,setObjet_global] = useState({'0':0});
+    const [objet_global,setObjet_global] = useState({
+            1: {
+                0:{
+                    titre :"journée de depression"
+                },
+                1: {
+                    situation: 'journée de depression',
+                    emotion: 4,
+                    'pensées_auto': 'je suis nul',
+                    confirmation: 'les gens me fuient',
+                    preuves_contraires: "j'ai des amis",
+                    'pensée_adaptée': "j'ai des qualités",
+                    emotion_resultat: 2
+                },
+                2: {
+                    situation: 'journée de depression',
+                    emotion: 6,
+                    'pensées_auto': "je n'interesse personne",
+                    confirmation: "personne ne m'appelle",
+                    preuves_contraires: "j'ai des amis",
+                    'pensée_adaptée': "on m'a dit l'autre jour que je comptais",
+                    emotion_resultat: 3
+                },
+                3: {
+                    situation: 'journée de depression',
+                    emotion: 5,
+                    'pensées_auto': 'je suis nul',
+                    confirmation: "je n'ai pas parlé",
+                    preuves_contraires: 'certaines personnes tres intelligentes sont silencieuses',
+                    'pensée_adaptée': "on m'a dit que j'étais interessant",
+                    emotion_resultat: 3
+                }
+            },
+            2: {
+                0:{
+                    titre :"dîner"
+                },
+                1: {
+                    situation: 'dîner',
+                    emotion: 5,
+                    'pensées_auto': 'je suis nul',
+                    confirmation: 'on me parle peu',
+                    preuves_contraires: "Je sais que Simon m'aime bien et il compte pour moi",
+                    'pensée_adaptée': "j'ai des qualités",
+                    emotion_resultat: 2
+                },
+                2: {
+                    situation: 'dîner',
+                    emotion: 6,
+                    'pensées_auto': "je n'interesse personne",
+                    confirmation: 'personne ne me parle',
+                    preuves_contraires: "j'ai des amis",
+                    'pensée_adaptée': "Je ne connais quasiment personne et j'ai le droit d'être discret",
+                    emotion_resultat: 3
+                },
+                3: {
+                    situation: 'dîner',
+                    emotion: 5,
+                    'pensées_auto': 'je suis nul',
+                    confirmation: 'je ne sais pas quoi dire',
+                    preuves_contraires: 'certaines personnes tres intelligentes sont silencieuses',
+                    'pensée_adaptée': 'Je sais que je suis cultivé',
+                    emotion_resultat: 3
+                }
+            }
+        });
 
     let situ;
     let emotion;
@@ -28,73 +93,73 @@ const Home = ({navigation}) => {
     let preuves_cont;
     let pens_adapt;
     let emo_resu;
+    var crypt1;
+    let phrase = "Je disparait du monde"
 
 
 
-    const _onChangeSitu = (situText) => {
-        console.log("ituation:" + situ);
-        situ = situText;
+    function encrypt() {
+        var o=JSON.stringify(objet_global).split('');
+        for(var i = 0, l = o.length; i < l; i++)
+            if(o[i] == '{')
+                o[i] = '}';
+            else if(o[i] == '}')
+                o[i] = '{';
+   crypt1=  encodeURI(phrase + o.join(''));
+        writeUserData();
     }
 
-    const _onChangeEmotion = (emotionText) => {
-        console.log("emotion:");
-        emotion = emotionText;
-    }
-    const _onChangePens_auto = (pens_autoText) => {
-        pens_auto = pens_autoText;
-    }
-    const _onChangeConf = (confText) => {
-        conf = confText;
-    }
-
-    const _onChangePreuves_cont = (preuves_contText) => {
-        preuves_cont = preuves_contText;
-    }
-
-    const _onChangePens_adapt = (pens_adaptText) => {
-        pens_adapt = pens_adaptText;
+    function decrypt(o1, salt) {
+        var o = decodeURI(o1);
+        if(salt && o.indexOf(salt) != 0)
+            throw new Error('object cannot be decrypted');
+        o = o.substring(salt.length).split('');
+        for(var i = 0, l = o.length; i < l; i++)
+            if(o[i] == '{')
+                o[i] = '}';
+            else if(o[i] == '}')
+                o[i] = '{';
+        console.log('######################');
+       return JSON.parse(o.join(''));
     }
 
-    const _onChangeeEmo_resu = (Emo_resuText) => {
-        emo_resu = Emo_resuText;
-    }
+    function writeUserData() {
 
+        console.log('**************************************');
+        console.log('Dans writeUserData, objet_global vaut:');
+        console.log('***************************************');
+        console.log(objet_global);
 
-
-    function writeUserData(situ, emotion, pens_auto, conf, preuves_cont, pens_adapt, emo_resu) {
-        graph_longueur++;
-        //console.log("situation:"+situ,"emotion:"+emotion,"auth:"+auth.currentUser.uid);
-        set(ref(db, auth.currentUser.uid + "/"), {
-            situation: situ, emotion: emotion
-            , pensees_automatiques: pens_auto, confirmation: conf, preuves_contraires: preuves_cont
-            , pensees_adapte: pens_adapt, emotion_resultat: emo_resu
+        console.log('*********************************************');
+        console.log('Dans writeUserData, crypt1 vaut:');
+        console.log('*********************************************');
+        console.log(crypt1);
+        //fabrication du dictionnaire pour un point.
+        let path = auth.currentUser.uid + "/" ;
+        console.log(path);
+        set(ref(db, path), {objet:crypt1
         });
-        const point = {};
-        point.situation = situ;
-        point.emotion = emotion;
-        point.pensees_automatiques = pens_auto;
-        point.confirmation = conf;
-        point.preuves_contraires = preuves_cont;
-        point.pensees_adapte = pens_adapt;
-        point.emotion_resultat = emo_resu;
-        graph[Object.keys(graph).length] = point;
     }
-
     const getGraphData = () => {
         const dbRef = ref(getDatabase());
         const db = getDatabase();
-        get(dbRef, auth.currentUser.uid).then((snapshot) => {
-        //query( ref(db,auth.currentUser.uid),OrderByChild(auth.currentUser.uid)).then((snapshot) => {
+        get(child(dbRef, auth.currentUser.uid)).then((snapshot) => {
             if (snapshot.exists()) {
+
+              //  for (var graph of snapshot.val() ) {
+
+
                 console.log("*******************-Home-*************************");
                 console.log("Les données recupérées de la Base sont les suivantes:");
                 console.log("***************************************************");
-              //  for (var graph of snapshot.val() ) {
-                    console.log("---------------------");
-                    console.log(snapshot.val());
-
-                //}
-                setObjet_global(snapshot.val());
+                console.log(snapshot);
+                var retourBDD= snapshot.val()["objet"];
+                console.log(retourBDD);
+                retourBDD= decrypt(retourBDD,phrase);
+                setObjet_global(retourBDD);
+                console.log("----------decryptage reussi:-----------");
+                console.log("----------Objet_global vaut:-----------");
+                console.log(objet_global);
 
             } else {
                 console.log("*******************-Home-*************************");
@@ -111,13 +176,19 @@ const Home = ({navigation}) => {
 
         <View style={styles.container}>
             <KeyboardAvoidingView>
+                <Button containerStyle={styles.button} onPress={encrypt}
+
+                        title={"Encryptage et envoi"}/>
                 <Button containerStyle={styles.button} onPress={getGraphData}
-                        containerStyle={styles.button}
-                        title={"GetGraphData"}/>
+
+                        title={"Get et Decryptage"}/>
+                <Button containerStyle={styles.button} onPress={writeUserData}
+
+                        title={"Envoi sur la BDD"}/>
                 <Button containerStyle={styles.button} onPress={() => {
                     navigation.navigate({name :'GraphInput',  params:{passageVar : objet_global} }) }}
-                        containerStyle={styles.button}
-                        title={"Input"}/>
+
+                        title={"Passage des données"}/>
             </KeyboardAvoidingView>
             <Text> Graph1:</Text>
 

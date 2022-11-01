@@ -11,6 +11,7 @@ import Home from './screens/Home';
 import Inscription from './screens/Inscription';
 import Identification from './screens/Identification';
 import GraphInput from "./screens/GraphInput";
+import PointInput from "./screens/PointInput";
 import StackNavigator from "@react-navigation/stack/src/navigators/createStackNavigator";
 const Stack = createStackNavigator();
 
@@ -31,6 +32,7 @@ export default function App () {
           <Stack.Screen name="Inscription" component={Inscription} />
           <Stack.Screen name="GraphInput" component={GraphInput} />
           <Stack.Screen name="Home" component={Home} />
+          <Stack.Screen name="PointInput" component={PointInput}/>
       </Stack.Navigator>
           </NavigationContainer>
   );
