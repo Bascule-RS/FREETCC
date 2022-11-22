@@ -1,144 +1,204 @@
-import {Button, Dimensions, StyleSheet, Text, TextInput, View} from "react-native";
+import {
+    Button,
+    Dimensions,
+    FlatList,
+    StyleSheet,
+    Text,
+    TextInput,
+    View,
+    ScrollView,
+    TouchableWithoutFeedback
+} from "react-native";
 import {LineChart} from "react-native-chart-kit";
-import {child, get, getDatabase, ref, set} from "firebase/database";
-import {auth} from "../Firebase";
+import {React, useLayoutEffect} from 'react';
+
+import {useEffect, useState} from "react";
+import styles from "../Styles";
+
+const Graph = ({navigation, route}) => {
+    const [graph, setgraph] = useState(route.params ? route.params.graph : console.error("Pas d'objet global transféré"));
+    let password = route.params ? route.params.password : console.log("route.params : pas de variable password transférée");
 
 
-const Graph = async ({navigation}) => {
+    /////////////////////////////////si un point a été renvoyé par le route:///////////
+    if (route.params.point) {
+        graph[Object.keys(graph).length] = route.params.point;
 
-    let situ;
-    let emotion;
-    // let pens_auto;
-    // let conf;
-    // let preuves_cont;
-    // let pens_adapt;
-    // let emo_resu;
+    }
+    route.params.point = null;
+
+    /////////////////////useEffect pour les conflits de barre de navigation:///////////////
+    useEffect(() => {
+            navigation.setOptions({
+                title: graph[0],
+                headerLeft: () => (<Button containerStyle={styles.button} onPress={() => {
+                    navigation.navigate('Home', {password: password, graph: graph})
+                }} title={"Back"}/>)
+            })
+        }
+    ) , [];
 
 
+    /////////////////////////maintenance://///////////////////////////////////////////
 
-    const _onChangeSitu = (situText) => {
-        console.log("+++++++\n+++++++\n+++++++\n+++++++\nsituation:" + situ);
-        situ = situText;
+    const printObjetGlobal = () => {
+        console.log("*******************-Graph-*************************");
+        console.log("           L'objet graph etant:");
+        console.log("***************************************************");
+        console.log(graph);
     }
 
-    const _onChangeEmotion = (emotionText) => {
-        console.log("emotion:" );
-        emotion = emotionText;
-    }
-    //const _onChangePens_auto = (pens_autoText) => {
-    //    pens_auto = pens_autoText;
-    //}
-    //const _onChangeConf = (confText) => {
-    //    conf = confText;
-    // }
+    ////////////////Le component de rentranscription graphique d'un point:////////////
+    const caseComponent = ({item}) =>
+        // console.log("caseComponent, item vaut:"+item );
+        (
 
-    //const _onChangePreuves_cont = (preuves_contText) => {
-    //   preuves_cont = preuves_contText;
-    // }
+            <View>
+                <View style={{height: 1, backgroundColor: 'black'}}/>
+                <View>
+                    <Text style={styles.titreCase}>Situation :{graph[item].situation}</Text>
+                </View>
 
-    // const _onChangePens_adapt = (pens_adaptText) => {
-    //    pens_adapt = pens_adaptText;
-    // }
 
-    //const _onChangeeEmo_resu = (Emo_resuText) => {
-    //    emo_resu = Emo_resuText;
-    // }
+                <View>
+                    <Text style={styles.attributTitle}>emotion:</Text><Text>{graph[item].emotion}</Text>
+                </View>
+                <View style={{height: 1, backgroundColor: 'black'}}/>
 
-//let graph_longueur = graph.length();
-    const getData = () => {
-        const dbRef =ref(getDatabase());
-        get(child(dbRef, auth.currentUser.uid)).then((snapshot) => {
-            if (snapshot.exists()) {
+                <View>
+                    <Text style={styles.attributTitle}>confirmation:</Text><Text> {graph[item].confirmation}</Text>
+                </View>
+                <View style={{height: 1, backgroundColor: 'black'}}/>
 
-                //graph = JSON.parse(snapshot);
-                console.log("*****************************");
-                console.log(graph);
-            } else {
-                console.log(snapshot);
+                <View>
+                    <Text style={styles.attributTitle}>pensées_auto :</Text><Text>{graph[item].pensées_auto}</Text>
+                </View>
+                <View style={{height: 1, backgroundColor: 'black'}}/>
+
+                <View>
+                    <Text style={styles.attributTitle}>pensée_adaptée :</Text><Text>{graph[item].pensée_adaptée}</Text>
+                </View>
+                <View style={{height: 1, backgroundColor: 'black'}}/>
+
+                <View>
+                    <Text style={styles.attributTitle}>preuves_contraires
+                        :</Text><Text>{graph[item].preuves_contraires}</Text>
+                </View>
+                <View style={{height: 1, backgroundColor: 'black'}}/>
+
+                <View>
+                    <Text style={styles.attributTitle}>emotion_resultat
+                        :</Text><Text>{graph[item].emotion_resultat}</Text>
+                </View>
+                <View style={{height: 1, backgroundColor: 'black'}}/>
+
+
+            </View>
+
+        )
+
+
+    if (Object.keys(graph).length > 2) {//grosse scission conditionnelle si le graph possède au moins deux point
+
+////////////////////////////////////////La Flatlist des points:///////////////////////
+        const ComponentListPoint = () => {
+
+            return (
+                <View>
+
+                    <Text style={styles.titreGraph}>{graph[0]}</Text>
+
+                    <View>
+                        <FlatList
+                            data={pointSupZero}
+                            renderItem={caseComponent}
+                            keyExtractor={(index) => index}
+                            contentContainerStyle={{
+                                flexGrow: 1,
+                            }}
+                        />
+                    </View>
+
+
+                </View>
+            )
+        }
+//////////////////////////////////////preparation des données pour le graph:///////////
+        let dataset = []
+        let pointSupZero = [];
+        for (let points of Object.keys(graph)) {
+            console.log(points);
+
+            if (parseInt(points, 10) > 0) {
+                dataset.push(graph[points]["emotion"]) ///on recupere bien la case "émotion"
+                pointSupZero.push(points);
             }
-        }).catch((error) => {
-            console.error(error);
-        });
-    }
-    return (
-<View style={styles.container}>
-    <TextInput placeholder="situation" autoFocus multiline={true} value={situ}
-               onChangeText={(situText) => _onChangeSitu(situText)}/>
+        }
+
+        console.log("la liste des points du graph est :" + dataset);//maintenance
+
+        return (
+            <View>
 
 
-    <Button containerStyle={styles.button} onPress={getData} containerStyle={styles.button}
-            title={"Write"}/>
-
-    <Text> Graph1:</Text>
-    <LineChart
-        data={{
-            labels: ["January", "February", "March", "April", "May", "June"],
-            datasets: [
-                {
-                    data: [
-                        Math.random() * 100,
-                        Math.random() * 100,
-                        Math.random() * 100,
-                        Math.random() * 100,
-                        Math.random() * 100,
-                        Math.random() * 100
-                    ]
-                }
-            ]
-        }}
-        width={Dimensions.get("window").width} // from react-native
-        height={220}
-        yAxisLabel="$"
-        yAxisSuffix="k"
-        yAxisInterval={1} // optional, defaults to 1
-        chartConfig={{
-            backgroundColor: "#e26a00",
-            backgroundGradientFrom: "#fb8c00",
-            backgroundGradientTo: "#ffa726",
-            decimalPlaces: 2, // optional, defaults to 2dp
-            color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-            labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-            style: {
-                borderRadius: 16
-            },
-            propsForDots: {
-                r: "6",
-                strokeWidth: "2",
-                stroke: "#ffa726"
-            }
-        }}
-        bezier
-        style={{
-            marginVertical: 8,
-            borderRadius: 16
-        }}
-    />
-</View>
+                <LineChart
+                    data={{
+                        labels: dataset,
+                        datasets: [
+                            {
+                                data: dataset
+                            }
+                        ]
+                    }}
+                    width={Dimensions.get("window").width} // from react-native
+                    height={200}
+                    yAxisLabel=""
+                    yAxisSuffix=""
+                    yAxisInterval={1} // optional, defaults to 1
+                    chartConfig={{
+                        backgroundColor: "#e26a00",
+                        backgroundGradientFrom: "#fb8c00",
+                        backgroundGradientTo: "#ffa726",
+                        decimalPlaces: 2, // optional, defaults to 2dp
+                        color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                        labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                        style: {
+                            borderRadius: 5
+                        },
+                        propsForDots: {
+                            r: "6",
+                            strokeWidth: "2",
+                            stroke: "#ffa726"
+                        }
+                    }}
+                    bezier
+                    style={{
+                        marginVertical: 2,
+                        borderRadius: 5
+                    }}
+                />
 
 
+                <Button containerStyle={styles.button} onPress={() => {
+                    navigation.navigate('PointInput')
+                }} title={"Ajouter un point"}/>
 
-);
+
+                <ComponentListPoint/>
+
+
+            </View>
+
+
+        );
+    } else return (<View>
+            <Text>Votre graph ne contient pas assez de points d'exposition</Text>
+            <Button containerStyle={styles.button} onPress={() => {
+                navigation.navigate('PointInput')
+            }} title={"Ajouter un point"}/>
+        </View>
+    )
 
 };
 
 export default Graph;
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        alignItems: "center", //tout est centré
-        justifyContent: "center",
-        padding: 10,
-    },
-    inputContainer: {
-        marginTop: 50,
-        width: 300, //la largeur des cases d'input
-
-    },
-    button: {
-        width: 200, //largeur des bouttons
-        marginTop: 10,
-        color: "#99991a",
-
-    },
-});

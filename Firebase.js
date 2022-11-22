@@ -7,7 +7,7 @@ import { getDatabase } from "firebase/database";
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
+/*const firebaseConfig = {
     apiKey: "AIzaSyC3_c4T5KpchMriShYNgwNLH2kkUituid0",
     authDomain: "otochain-f5bbd.firebaseapp.com",
     databaseURL: "https://otochain-f5bbd-default-rtdb.firebaseio.com",
@@ -16,7 +16,25 @@ const firebaseConfig = {
     messagingSenderId: "557582238019",
     appId: "1:557582238019:web:c321c3f98c721af20d6ff6",
     measurementId: "G-C16C1JZSNY"
+};*/
+const firebaseConfig = {
+
+    apiKey: "AIzaSyDMx_ejVc9I1M4WoAxgJjzHWsYvx0fYDgo",
+
+    authDomain: "freetcc-4ffb8.firebaseapp.com",
+
+    projectId: "freetcc-4ffb8",
+
+    storageBucket: "freetcc-4ffb8.appspot.com",
+
+    messagingSenderId: "55141602566",
+
+    appId: "1:55141602566:web:92a6af1a5b5c803dca7a87",
+
+    measurementId: "G-TEJXKX7GK1"
+
 };
+
 // Initialize Firebase
 // Get a document, forcing the SDK to fetch from the offline cache.
 const app = initializeApp(firebaseConfig);

@@ -12,8 +12,9 @@ import Inscription from './screens/Inscription';
 import Identification from './screens/Identification';
 import GraphInput from "./screens/GraphInput";
 import PointInput from "./screens/PointInput";
+import Graph from "./screens/Graph";
 import StackNavigator from "@react-navigation/stack/src/navigators/createStackNavigator";
-const Stack = createStackNavigator();
+
 
 const globalScreenOptions = {
     headerStyle: {backgroundColor: "#FFA500"},
@@ -23,13 +24,14 @@ const globalScreenOptions = {
 
 
 }
-
+const Stack = createStackNavigator();
 export default function App () {
   return (
       <NavigationContainer>
-      <Stack.Navigator initialRouteName="Identification"  screenOptions={globalScreenOptions}>
+      <Stack.Navigator initialRouteName="Indentification"  screenOptions={globalScreenOptions}>
           <Stack.Screen name="Identification" component={Identification} />
           <Stack.Screen name="Inscription" component={Inscription} />
+          <Stack.Screen name="Graph" component={Graph} />
           <Stack.Screen name="GraphInput" component={GraphInput} />
           <Stack.Screen name="Home" component={Home} />
           <Stack.Screen name="PointInput" component={PointInput}/>

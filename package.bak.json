@@ -14,28 +14,13 @@
     "babel-loader": {
       "loader-utils": "^1.4.2"
     },
-    "immer": "~9.0.5",
-    "tar": "~4.4.17",
-    "node-forge" :"^1.2.1",
-    "minimatch" : "~3.0.5",
-    "glob-parent" : "~5.1.2",
-    "axios" : "0.21.2",
-    "ansi-html" : "~0.0.8",
+    "immer": "^8.0.1",
     "react-dev-utils": {
       "loader-utils": "^2.0.0"
     },
     "css-loader": {
       "loader-utils": "^1.2.3"
     },
-"nth-check" : "^2.0.1",
-"got": "^11.8.5",
-"browserslist" : "^4.16.4",
-"ajv" : "^6.12.3",
-
-
-
-
-
     "html-webpack-plugin": {
       "loader-utils": "^1.4.2"
     },
