@@ -23,6 +23,8 @@ const firebaseConfig = {
 
     authDomain: "freetcc-4ffb8.firebaseapp.com",
 
+    databaseURL: "https://freetcc-4ffb8-default-rtdb.europe-west1.firebasedatabase.app",
+
     projectId: "freetcc-4ffb8",
 
     storageBucket: "freetcc-4ffb8.appspot.com",
@@ -32,6 +34,7 @@ const firebaseConfig = {
     appId: "1:55141602566:web:92a6af1a5b5c803dca7a87",
 
     measurementId: "G-TEJXKX7GK1"
+
 
 };
 

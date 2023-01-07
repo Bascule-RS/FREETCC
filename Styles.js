@@ -8,6 +8,9 @@ const styles = StyleSheet.create({
         marginBottom: 30,
         alignItems: 'center', justifyContent: 'center'
     },
+    containerPoint :{
+      flex:1
+    },
     container: {
         flex: 1,
         marginTop: 110,

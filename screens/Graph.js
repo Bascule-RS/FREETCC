@@ -14,9 +14,10 @@ import {React, useLayoutEffect} from 'react';
 
 import {useEffect, useState} from "react";
 import styles from "../Styles";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Graph = ({navigation, route}) => {
-    const [graph, setgraph] = useState(route.params ? route.params.graph : console.error("Pas d'objet global transféré"));
+
     let password = route.params ? route.params.password : console.log("route.params : pas de variable password transférée");
 
 
@@ -31,13 +32,39 @@ const Graph = ({navigation, route}) => {
     useEffect(() => {
             navigation.setOptions({
                 title: graph[0],
-                headerLeft: () => (<Button containerStyle={styles.button} onPress={() => {
-                    navigation.navigate('Home', {password: password, graph: graph})
-                }} title={"Back"}/>)
+                headerLeft: () => (<Button containerStyle={styles.button} onPress={() => {retourHome  }} title={"Back"}/>)
             })
         }
     ) , [];
 
+    //////////////////////////retourHome/////////////////////////////////
+    const storeObject = async (graph,key) => {
+        try {
+            const jsonValue = JSON.stringify(graph)
+            await AsyncStorage.setItem('@'+key, graph);
+        } catch (e) {
+            console.log('######################');
+            console.log("erreur de async storage:" + e);
+            console.log('######################');
+        }
+    }
+
+    const retourHome= ( )=>{
+        storeObject(graph, graph);
+        navigation.navigate('Home',{graph:true});
+    }
+    ///////////////////// recuperation du graph:///////////////
+    const getObject = async () => {
+        try {
+            const jsonValue = await AsyncStorage.getItem('@object')
+            return jsonValue != null ? JSON.parse(jsonValue) : null;
+        } catch (e) {
+            console.log('######################');
+            console.log("erreur de async storage:" + e);
+            console.log('######################');
+        }
+    }
+    const graph = getObject ;
 
     /////////////////////////maintenance://///////////////////////////////////////////
 
@@ -139,7 +166,7 @@ const Graph = ({navigation, route}) => {
 
         return (
             <View>
-
+                <ScrollView>
 
                 <LineChart
                     data={{
@@ -186,7 +213,7 @@ const Graph = ({navigation, route}) => {
 
                 <ComponentListPoint/>
 
-
+                    </ScrollView>
             </View>
 
 

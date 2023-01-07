@@ -1,1 +1,0 @@
-/home/terce/Bureau/FREETCC2/FREETCC/FREETCC-formulaire2/package-lock.json

@@ -16,9 +16,8 @@ const Identification = ({navigation}) => {
 
 
     const signIn = () => {
-        setPersistence(auth, inMemoryPersistence).then(() => {
-            return signInWithEmailAndPassword(auth, email, password)
-        }).then(() => {
+        signInWithEmailAndPassword(auth, email, password)
+       .then(() => {
             navigation.navigate('Home', {password: password});
         }).catch((error) => {
             const errorCode = error.code;

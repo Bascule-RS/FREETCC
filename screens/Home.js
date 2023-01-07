@@ -1,5 +1,5 @@
-import React from 'react';
-
+import React, {useLayoutEffect} from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useEffect, useState} from "react";
 import {
     StyleSheet,
@@ -14,7 +14,7 @@ import {
     Modal
 } from 'react-native';
 import {auth} from "../Firebase";
-import Dialog from "react-native-dialog";
+
 import {
     LineChart,
     BarChart,
@@ -29,74 +29,66 @@ import styles from "../Styles";
 
 
 const Home = ({navigation, route}) => {
+    var objet_global = {};
     let password = route.params ? route.params.password : console.log("route.params : pas de variable password transférée");
+    let graph;
+    let listGraph = [];
+    let isLoading = true;
 
 
-    let objet_global = {
-        "1": {
-            "0": "journée sans alcool",
-            "1": {
-                situation: 'désir au cours de la journée',
-                emotion: 4,
-                'pensées_auto': 'envie moyenne',
-                confirmation: 'Ca va me rassurer , me mettre bien',
-                preuves_contraires: "l'alcool le lendemain me rend depressif",
-                'pensée_adaptée': "Je vais regarder un film",
-                emotion_resultat: 2
-            },
-            "2": {
-                situation: 'désir au cours de la journée',
-                emotion: 6,
-                'pensées_auto': "Gross envie a cause d'un problème au boulot",
-                confirmation: "Allez je prends juste trois bières",
-                preuves_contraires: "Lacher maintenant me fera lacher plus tard",
-                'pensée_adaptée': "Je vais aller courir",
-                emotion_resultat: 3
-            },
-            "3": {
-                situation: 'désir au cours de la journée',
-                emotion: 5,
-                'pensées_auto': 'bonne semaine. Week end. envie de décompresser',
-                confirmation: "On a qu'une vie",
-                preuves_contraires: "Je vais m'écrouler le lendemain",
-                'pensée_adaptée': "Aller marcher",
-                emotion_resultat: 3
+//////////////////////////Async storage://////////////////////////////
+    const getObject = async (key) => {
+        try {
+
+            if (key == "graph") {
+                const jsonValue = await AsyncStorage.getItem('@' + key);
+                graph != null ? JSON.parse(jsonValue) : null; //objet_global
+            } else if (key == "objet_global") {
+                const jsonValue = await AsyncStorage.getItem('@' + key);
+                objet_global != null ? JSON.parse(jsonValue) : null; //objet_global
+            } else {
+                const password = await AsyncStorage.getItem('@' + key);
+
             }
-        },
-        "2": {
-            "0": 'soirée sans alcool',
-            "1": {
-                situation: 'soirée',
-                emotion: 5,
-                'pensées_auto': "ca va me mettre a l'aise",
-                confirmation: 'tout le monde boit',
-                preuves_contraires: "il faut que je perde l'abitude",
-                'pensée_adaptée': "certaines personnes sont au perrier",
-                emotion_resultat: 2
-            },
-            "2": {
-                situation: 'soirée',
-                emotion: 6,
-                'pensées_auto': "Tout le monde est bourré, envie d'entrer dans l'ambiance",
-                confirmation: 'ça va me mettre bien',
-                preuves_contraires: "j'ai repris le sport",
-                'pensée_adaptée': "Je vais rentrer sobre et je serais en pleine forme demain matin",
-                emotion_resultat: 3
-            },
-            "3": {
-                situation: 'soirée',
-                emotion: 5,
-                'pensées_auto': "ca va me mettre a l'aise",
-                confirmation: 'ca va me décoincer',
-                preuves_contraires: 'certaines personnes tres intelligentes sont silencieuses',
-                'pensée_adaptée': "il faut que je prenne l'habitude d'arrêter de boire",
-                emotion_resultat: 3
-            }
+            console.log('############################################');
+            console.log("async storage: objet récupéré avec la clé " + key);
+            console.log("");
+            console.log('############################################');
+
+
+        } catch (e) {
+            console.log('######################');
+            console.log("erreur de async storage:" + e);
+            console.log('######################');
         }
     }
 
 
-    var crypt1;
+    const storeObject = async (object, key) => {
+        try {
+            if (key == "objet_global") {
+                const jsonValue = JSON.stringify(object)
+                await AsyncStorage.setItem('@' + key, jsonValue)
+            } else {
+                await AsyncStorage.setItem('@' + key, object)
+            }
+            console.log('############################################');
+            console.log("async storage: objet rangé à la clé " + key);
+            console.log('############################################');
+
+        } catch (e) {
+            console.log('############################################');
+            console.log("erreur de async storage:" + e);
+            console.log('############################################');
+
+        }
+    }
+
+    //storeObject(object_global,"object_global");
+
+    if (password != null) {
+        storeObject(password, "password");
+    }
 
 
 ///////////////////////Maintenance:////////////////////////////////
@@ -113,7 +105,10 @@ const Home = ({navigation, route}) => {
         console.log("***************************************************");
         console.log(objet_global);
     }
+
 ///////////////////////Cryptage:////////////////////////////////
+    var crypt1;
+
     function decrypt(o1, salt) {
         var o = decodeURI(o1);
         if (salt && o.indexOf(salt) != 0)
@@ -126,11 +121,12 @@ const Home = ({navigation, route}) => {
                 o[i] = '{';
         console.log('######################');
         console.log(o.join(''));
-        return o.join('');
-        //return JSON.parse(o.join(''));
+
+        return JSON.parse(o.join(''));
     }
 
     function encrypt() {
+        getObject("password");
         var o = JSON.stringify(objet_global).split('');
         console.log("***************************************************");
         console.log("          Dans encrypt, o vaut:");
@@ -169,10 +165,14 @@ const Home = ({navigation, route}) => {
             objet: crypt1
         });
     }
-    const getGraphData = () => {
+
+
+    const getGraphData = new Promise(async (resolve, reject) => {
+        await getObject("password");
+
         const dbRef = ref(getDatabase());
-        const db = getDatabase();
-        get(child(dbRef, auth.currentUser.uid)).then((snapshot) => {
+
+        await get(child(dbRef, auth.currentUser.uid)).then((snapshot) => {
             if (snapshot.exists()) {
 
                 //  for (var graph of snapshot.val() ) {
@@ -191,109 +191,149 @@ const Home = ({navigation, route}) => {
                 console.log("           La password etant:");
                 console.log("***************************************************");
                 console.log(password);
+
                 retourBDD = decrypt(retourBDD, password);
                 objet_global = retourBDD;
+
                 console.log("----------decryptage reussi:-----------");
                 console.log("----------Objet_global vaut:-----------");
                 console.log(objet_global);
+                resolve("get sur la BDD réussi");
 
             } else {
                 console.log("*******************-Home-*************************");
                 console.log("Pas de données dans la database");
                 console.log("***************************************************");
+                reject("erreur de get sur la database")
             }
         }).catch((error) => {
             console.error(error);
         });
-    }
-///////////////////////Ajout d'un Graph:////////////////////////////////
-    if( route.params.graph ) { //si le paramètre graph est renvoyé lors de la navigation
-        handleAjout(route.params.graph)
-    }
-    else console.log("route.params : pas de variable  de Graphique transférée");
 
-    function handleAjout (graph) {
-        let levier = false;
-        for ( let  clés of Object.keys(objet_global)){
-            if (objet_global[clés][0] == graph[0]) { // test sur toutes les clés de l'objet global
-                objet_global[clés]= graph;           // pour vérifier si le nom existe déjà
-                                                    //et le changer
-                levier = true;
-            }
-        }
-     if (levier == false) // ici il ne s'agit que d'un nom de graph (entré dans GraphInput)
-        objet_global[Object.keys(objet_global).length+1] = graph;
-        console.log("*******************-Home-*************************");
-        console.log("Graph (ou nom de Graph) transféré:");
-        console.log("***************************************************");
-        console.log(objet_global);
-    }
-///////////////////////Ajout d'un Nom de Graph:////////////////////////////////
-    if( route.params.nomGraph ) {
-        handleAjoutNom(route.params.nomGraph)
-    }
-    else console.log("route.params : pas de variable nomGraph transférée");
-
-   function handleAjoutNom (nomGraph) {
-        objet_global[Object.keys(objet_global).length+1] = {};
-        objet_global[Object.keys(objet_global).length][0] = nomGraph;
-        console.log(objet_global);
-    }
-////////////////////////////////////////////////////////////////////////
+    })
 
 
-    const listGraph = Object.keys(objet_global);
+    //////////////Liste des Graphs et passage au graph correspondant://////////////
 
-    const itemListGraph = ({item}) => (
+    //useEffect(() => {
+
+    //}),[];
+    const itemListGraph = ({item}) => {
         <View>
-        <Button style={styles.button} onPress={() => {
-            navigation.navigate('Graph', {graph: objet_global[item]})
-        }} title={objet_global[item][0]}/>
-        <Text style={styles.title_text}>*-*</Text>
-        </View>
-    )
+            <Button style={styles.button} onPress={graphInput} title={objet_global[item][0]}/>
+            <Text style={styles.title_text}>---</Text>
+        </View>;
+    }
 
-    return (//KeyboardAvoidingView : comportement du clavier
 
-        <View >
+///////////////////////Ajout d'un Graph:////////////////////////////////
+    if (route.params.graph) { //si le paramètre graph est renvoyé lors de la navigation
+        handleAjout();
+    } else console.log("route.params : pas de variable  de Graphique transférée");
+
+    function handleAjout() {
+
+        getObject("graph"); // recuperation du graph dans async
+        if (!graph[1]) {// si le graph n'a qu'un titre alors c'est un nom de graph
+            objet_global[Object.keys(objet_global).length + 1] = graph;
+            console.log("*******************-Home-*************************");
+            console.log("Nouveau graph transféré:");
+            console.log("***************************************************");
+        } else {
+            for (let clés of Object.keys(objet_global)) {
+                if (objet_global[clés][0] == graph[0]) { // test sur toutes les clés de l'objet global
+                    objet_global[clés] = graph;           // pour vérifier si le nom existe déjà
+                    //et le remplacer
+
+                }
+            }
+
+            console.log("*******************-Home-*************************");
+            console.log("Graph  transféré (ou modifié)");
+            console.log("***************************************************");
+        }
+        console.dir(objet_global);
+
+        storeObject(object_global, "objet_global");
+    }
+
+//////////////Appel vers graph ou GraphInput://////////////
+
+
+    function graphInput(param) {
+        storeObject(object_global, objet_global);// sauvegarde de l'objet global avant le transfer
+        if (param)
+            navigation.navigate('GraphInput')
+        else {
+            navigation.navigate('Graph');
+        }
+
+    }
+
+
+//////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////Recuperation sur la BDD//////////////////
+
+    useLayoutEffect(() => {
+        getGraphData.then(() => {
+
+                console.log("*******************-Home-*************************"),
+                    console.log("Après GetGraphData :" + objet_global),
+                    listGraph = Object.keys(objet_global),
+                    console.log("lecture de ItemListGraph"),
+                    console.log("la liste graph récupérée est :" + listGraph)
+
+
+            }
+        )
+    }, );
+/*
+   while(!listGraph.length)
+        return (     <View>
+            <Text style={styles.title_text}> chargement des données de FireBase</Text>
+        </View>)
+*/
+
+        console.log("listgraph vaaaaaaaaaaaaaaaaut" + listGraph);
+        return (//KeyboardAvoidingView : comportement du clavier
+
             <View>
-            <Text style={styles.title_text}> La liste des graphs :</Text>
-            </View>
-            <FlatList
-                data={listGraph}
-                renderItem={itemListGraph}
-                keyExtractor={(item, index) => item + index}
-            />
-            <Button containerStyle={styles.button} onPress={() => {
-                navigation.navigate('GraphInput', {objet_global: objet_global})}}
+                <View>
+                    <Text style={styles.title_text}> La liste des graphs :</Text>
+                </View>
+                <FlatList
+                    data={listGraph}
+                    renderItem={itemListGraph}
+                    keyExtractor={(item, index) => item + index}
+                />
+                <Button containerStyle={styles.button} onPress={(onPress = 1) => graphInput(onPress)}
+                        title={"Ajouter un graph"}/>
 
-                    title={"Ajouter un graph"}/>
-            <KeyboardAvoidingView>
-                <View><Text style={styles.title_text}> Gestion des données:</Text>
+                <KeyboardAvoidingView>
+                    <Text style={styles.title_text}> Gestion des données:</Text>
+
                     <Button containerStyle={styles.button} onPress={encrypt}
                             title={"Encryptage et envoi"}/>
-                </View>
-                <Button containerStyle={styles.button} onPress={getGraphData}
-
-                        title={"Get et Decryptage"}/>
-                <Button containerStyle={styles.button} onPress={printPassword}
-
-                        title={"Print password"}/>
-                <Button containerStyle={styles.button} onPress={printObjetGlobal}
-
-                        title={"Print objetGlobal"}/>
-
-                <Button containerStyle={styles.button} onPress={() => {
-                    navigation.navigate('Graph', {objet_global: objet_global , password : password})
-                }}
-
-                        title={"Passage à Graph avec passage des données"}/>
-            </KeyboardAvoidingView>
 
 
-        </View>
+                    <Button containerStyle={styles.button} onPress={getGraphData}
+                            title={"Get et Decryptage"}/>
 
-    );
+                    <Button containerStyle={styles.button} onPress={printPassword}
+                            title={"Print password"}/>
+
+
+                    <Button containerStyle={styles.button} onPress={printObjetGlobal}
+                            title={"Print objetGlobal"}/>
+
+
+                </KeyboardAvoidingView>
+
+
+            </View>
+
+        );
+
 
 };
 

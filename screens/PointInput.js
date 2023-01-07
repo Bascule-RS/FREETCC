@@ -1,6 +1,6 @@
 import React, {useLayoutEffect} from 'react';
 
-import {StyleSheet, Text, View, TextInput, Dimensions, Button, KeyboardAvoidingView} from 'react-native';
+import {StyleSheet, Text, View, TextInput, Dimensions, Button, KeyboardAvoidingView ,ScrollView} from 'react-native';
 import styles from "../Styles";
 
 const PointInput = ({navigation, route}) => {
@@ -72,25 +72,28 @@ const PointInput = ({navigation, route}) => {
 
     return (//KeyboardAvoidingView : comportement du clavier
         <View style={styles.container}>
-            <View style={styles.container}>
-                <KeyboardAvoidingView>
+            <View style={styles. containerPoint}>
+                <ScrollView>
+                    <KeyboardAvoidingView>
+                    <Text style = {styles.title_text}>Situation:</Text>
                     <TextInput placeholder="situation" autoFocus multiline={true} value={situ}
                                onChangeText={(situText) => _onChangeSitu(situText)}/>
+                    <Text style = {styles.title_text}>Emotion:</Text>
                     <TextInput placeholder="emotion" multiline={true} value={emotion}
                                onChangeText={(emotionText) => _onChangeEmotion(emotionText)}/>
-
+                    <Text style = {styles.title_text}>Pensées automatiques:</Text>
                     <TextInput placeholder="pens_auto" multiline={true} value={pens_auto}
                                onChangeText={(pens_autoText) => _onChangePens_auto(pens_autoText)}/>
-
+                    <Text style = {styles.title_text}>Pensées de confirmation:</Text>
                     <TextInput placeholder="conf" multiline={true} value={conf}
                                onChangeText={(confText) => _onChangeConf(confText)}/>
-
+                    <Text style = {styles.title_text}>Preuves contraires:</Text>
                     <TextInput placeholder="preuves_cont" multiline={true} value={preuves_cont}
                                onChangeText={(preuves_contText) => _onChangePreuves_cont(preuves_contText)}/>
-
+                    <Text style = {styles.title_text}>Pensées adaptées:</Text>
                     <TextInput placeholder="pens_adapt" multiline={true} value={pens_adapt}
                                onChangeText={(pens_adaptText) => _onChangePens_adapt(pens_adaptText)}/>
-
+                    <Text style = {styles.title_text}>Emotion resultat:</Text>
                     <TextInput placeholder="émo_résu" multiline={true} value={emo_resu}
                                onChangeText={(Emo_resuText) => _onChangeeEmo_resu(Emo_resuText)}/>
 
@@ -98,8 +101,8 @@ const PointInput = ({navigation, route}) => {
                     <Button containerStyle={styles.button} onPress={() => pointCreationSend()}
                             containerStyle={styles.button}
                             title={"Retour Graph"}/>
-
-                </KeyboardAvoidingView>
+                    </KeyboardAvoidingView>
+                </ScrollView>
 
 
             </View>
